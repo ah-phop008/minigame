@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class test_walk : MonoBehaviour {
-	public float speed = 5;
+	
 	public float jump = 3;
 	public float stump = 10;
 	public float hantei_of_jump = 0.7f;
@@ -13,18 +13,20 @@ public class test_walk : MonoBehaviour {
 	bool ShotLimitCount_flg = false;
 	bool jump_flg;
 
-
-
-	Vector3 horizontal_move;
+	//移動に関する変数
+	public float speed = 5;
+	float speed2 = 0.1f;
+	Vector2 input_value = new Vector2 (1, 1);
+	Vector3 direction;
+	Vector3 decision_speed = new Vector3(0, 0, 0);
+	Vector3 horizontal_move;//キーボードの変数
 	public Vector3 center_point;
 
+	//その他
 	public GameObject Ammo;
-
 	Rigidbody rb;
-	float NowSpeedOf_y;
-	float NowSpeedOf_z;
-
 	status s;
+
 	// Use this for initialization
 	void Start () {
 		rb = GetComponent<Rigidbody> ();
@@ -36,43 +38,14 @@ public class test_walk : MonoBehaviour {
 		Shoted_Action ();
 
 		Shot ();
+
+		Debug.Log (Input.GetAxis ("Horizontal") + ", " + Input.GetAxis ("Vertical"));
 	}
 		
 	void FixedUpdate () {
 
-		//移動
-
-		if (Input.GetKeyDown (KeyCode.Space) && !s.stumped && jump_flg) {
-			rb.AddForce (new Vector3 (0, 5 * jump, 0), ForceMode.Impulse);
-			jump_flg = false;
-		}
-
-		if (Input.GetKey (KeyCode.W)) {
-			float a;
-			NowSpeedOf_y = rb.velocity.y;
-			horizontal_move = transform.position - center_point;
-			a = 1 / Mathf.Sqrt (Mathf.Pow(horizontal_move.x, 2) + Mathf.Pow(horizontal_move.z, 2));
-			horizontal_move = (teisuubai(speed * a, horizontal_move));
-			horizontal_move.y = NowSpeedOf_y;
-			rb.velocity = horizontal_move;
-		} else if (Input.GetKey (KeyCode.S)) {
-			float a;
-			NowSpeedOf_y = rb.velocity.y;
-			horizontal_move = transform.position - center_point;
-			a = 1 / Mathf.Sqrt (Mathf.Pow(horizontal_move.x, 2) + Mathf.Pow(horizontal_move.z, 2));
-			horizontal_move = (teisuubai(speed * a * -1, horizontal_move));
-			horizontal_move.y = NowSpeedOf_y;
-			rb.velocity = horizontal_move;
-		}
-		if (Input.GetKey (KeyCode.A)) {
-			NowSpeedOf_y = rb.velocity.y;
-			NowSpeedOf_z = rb.velocity.z;
-			rb.velocity = (new Vector3 (-1 * speed, NowSpeedOf_y, NowSpeedOf_z));
-		} else if (Input.GetKey (KeyCode.D)) {
-			NowSpeedOf_y = rb.velocity.y;
-			NowSpeedOf_z = rb.velocity.z;
-			rb.velocity = (new Vector3 (speed, NowSpeedOf_y, NowSpeedOf_z));
-		}
+		//Move_Keyboard ();
+		Move_Gamepad ();
 	}
 
 
@@ -147,9 +120,62 @@ public class test_walk : MonoBehaviour {
 		}
 	}
 
+	void Move_Gamepad () {
+		
+		input_value = new Vector2(Input.GetAxis ("Horizontal"), Input.GetAxis("Vertical"));
 
-	Vector3 teisuubai (float a, Vector3 v) {
-		v.x *= a; v.y *= a; v.z *= a;
-		return v;
+		//キャラの向き
+		transform.forward = new Vector3(input_value.x, 0, input_value.y);
+
+
+		//キャラの移動
+		direction = transform.position - center_point;
+		decision_speed.x = input_value.x + (input_value.y / Mathf.Pow(direction.z, 2)) * direction.x;  //Mathf.Pow(~~~) → direction.zでもうまくいくかも....
+		decision_speed.z = input_value.y;
+
+		rb.MovePosition (transform.position + speed2 * decision_speed);
+
+		if (Input.GetButtonDown ("Jump") && !s.stumped && jump_flg) {
+			rb.AddForce (new Vector3 (0, 5 * jump, 0), ForceMode.Impulse);
+			jump_flg = false;
+		}
 	}
+
+	void Move_Keyboard () {
+		//移動(キーボード用)
+		//rb.MovePosition (transform.position + speed2 * transform.forward);
+
+		if (Input.GetKeyDown (KeyCode.Space) && !s.stumped && jump_flg) {
+			rb.AddForce (new Vector3 (0, 5 * jump, 0), ForceMode.Impulse);
+			jump_flg = false;
+		}
+
+		if (Input.GetKey (KeyCode.W)) {
+			transform.rotation = Quaternion.Euler (0, 0, 0);
+			rb.MovePosition (transform.position + speed2 * transform.forward);
+
+			float a;
+			horizontal_move = transform.position - center_point;
+			a = 1 / Mathf.Sqrt (Mathf.Pow(horizontal_move.x, 2) + Mathf.Pow(horizontal_move.z, 2));
+			horizontal_move = speed2 * a * horizontal_move;
+			rb.MovePosition (transform.position + horizontal_move);
+		} else if (Input.GetKey (KeyCode.S)) {
+			transform.rotation = Quaternion.Euler (0, 180, 0);
+			rb.MovePosition (transform.position + speed2 * transform.forward);
+
+			float a;
+			horizontal_move = transform.position - center_point;
+			a = 1 / Mathf.Sqrt (Mathf.Pow(horizontal_move.x, 2) + Mathf.Pow(horizontal_move.z, 2));
+			horizontal_move = speed2 * a * -1 * horizontal_move;
+			rb.MovePosition (transform.position + horizontal_move);
+		}
+		if (Input.GetKey (KeyCode.A)) {
+			transform.rotation = Quaternion.Euler (0, 270, 0);
+			rb.MovePosition (transform.position + speed2 * transform.forward);
+		} else if (Input.GetKey (KeyCode.D)) {
+			transform.rotation = Quaternion.Euler (0, 90, 0);
+			rb.MovePosition (transform.position + speed2 * transform.forward);
+		}
+	}
+		
 }
