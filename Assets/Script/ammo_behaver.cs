@@ -57,10 +57,6 @@ public class ammo_behaver : MonoBehaviour {
 				s.shoted = true;
 				s.attacked = true;
 			}
-		} else if (c.gameObject.tag == "Target") {
-			GameObject target = c.gameObject;
-			MyPlayer.GetComponent<status> ().Score += target.GetComponent<target_behaver> ().point;
-			Destroy (target);
 		}
 
 		if (c.gameObject != MyPlayer.gameObject) {
