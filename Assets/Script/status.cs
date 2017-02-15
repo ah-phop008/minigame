@@ -7,4 +7,8 @@ public class status : MonoBehaviour {
 	public bool shoted = false;
 	public bool attacked = false;
 	public int Score = 0;
+
+	void Update () {
+		if (Score < 0) Score = 0;
+	}
 }

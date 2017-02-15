@@ -12,6 +12,7 @@ public class test_walk : MonoBehaviour {
 	int ShotLimitCount = 0;
 	bool ShotLimitCount_flg = false;
 	bool jump_flg;
+	public bool DontMove = false;
 
 	//移動に関する変数
 	public float speed = 5;
@@ -26,6 +27,8 @@ public class test_walk : MonoBehaviour {
 	public GameObject Ammo;
 	Rigidbody rb;
 	status s;
+	public int Stump_PlusPoint = 50;
+	public int Stumped_MinusPoint = 30;
 
 	// Use this for initialization
 	void Start () {
@@ -39,13 +42,14 @@ public class test_walk : MonoBehaviour {
 
 		Shot ();
 
-		Debug.Log (Input.GetAxis ("Horizontal") + ", " + Input.GetAxis ("Vertical"));
+		//Debug.Log (Input.GetAxis ("Horizontal") + ", " + Input.GetAxis ("Vertical"));
 	}
 		
 	void FixedUpdate () {
-
-		//Move_Keyboard ();
-		Move_Gamepad ();
+		if (!DontMove) {
+			//Move_Keyboard ();
+			Move_Gamepad ();
+		}
 	}
 
 
@@ -56,17 +60,20 @@ public class test_walk : MonoBehaviour {
 			if (!c.gameObject.GetComponent<status> ().attacked) {
 				c.gameObject.GetComponent<status> ().stumped = true;
 				c.gameObject.GetComponent<status> ().attacked = true;
+				c.gameObject.GetComponent<status> ().Score -= Stumped_MinusPoint;
+				GetComponent<status> ().Score += Stump_PlusPoint;
 			}
 		}
 
 		if (c.gameObject.CompareTag ("Floor")) {
 			jump_flg = true;
+			DontMove = false;
 		}
 	}
 
 
 	void Shot () {
-		if (Input.GetKeyDown (KeyCode.E)) {
+		if (Input.GetButtonDown("Fire") || Input.GetKeyDown (KeyCode.E)) {
 			if (ShotLimitCount == 0) {
 				GameObject ammo = Instantiate (Ammo);
 				ammo.transform.parent = transform;
@@ -124,16 +131,19 @@ public class test_walk : MonoBehaviour {
 		
 		input_value = new Vector2(Input.GetAxis ("Horizontal"), Input.GetAxis("Vertical"));
 
-		//キャラの向き
-		transform.forward = new Vector3(input_value.x, 0, input_value.y);
+
 
 
 		//キャラの移動
-		direction = transform.position - center_point;
-		decision_speed.x = input_value.x + (input_value.y / Mathf.Pow(direction.z, 2)) * direction.x;  //Mathf.Pow(~~~) → direction.zでもうまくいくかも....
-		decision_speed.z = input_value.y;
+		if (input_value.x != 0 || input_value.y != 0) {
+			direction = transform.position - center_point;
+			decision_speed.x = input_value.x + (input_value.y / direction.z) * direction.x;
+			decision_speed.z = input_value.y;
 
-		rb.MovePosition (transform.position + speed2 * decision_speed);
+			rb.MovePosition (transform.position + speed2 * decision_speed);
+			//キャラの向き
+			transform.forward = decision_speed;
+		}
 
 		if (Input.GetButtonDown ("Jump") && !s.stumped && jump_flg) {
 			rb.AddForce (new Vector3 (0, 5 * jump, 0), ForceMode.Impulse);
