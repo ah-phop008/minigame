@@ -30,10 +30,13 @@ public class test_walk : MonoBehaviour {
 	public int Stump_PlusPoint = 50;
 	public int Stumped_MinusPoint = 30;
 
+	Animator anim;
+
 	// Use this for initialization
 	void Start () {
 		rb = GetComponent<Rigidbody> ();
 		s = GetComponent<status> ();
+		anim = GetComponent<Animator> ();
 	}
 
 	void Update () {
@@ -143,6 +146,11 @@ public class test_walk : MonoBehaviour {
 			rb.MovePosition (transform.position + speed2 * decision_speed);
 			//キャラの向き
 			transform.forward = decision_speed;
+
+			//animator
+			anim.SetBool ("isRunning", true);
+		} else {
+			anim.SetBool ("isRunning", false);
 		}
 
 		if (Input.GetButtonDown ("Jump") && !s.stumped && jump_flg) {
