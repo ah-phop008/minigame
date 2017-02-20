@@ -34,7 +34,7 @@ public class test_walk : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		rb = GetComponent<Rigidbody> ();
+		rb = this.GetComponent<Rigidbody> ();
 		s = GetComponent<status> ();
 		anim = GetComponent<Animator> ();
 	}
@@ -134,9 +134,6 @@ public class test_walk : MonoBehaviour {
 		
 		input_value = new Vector2(Input.GetAxis ("Horizontal"), Input.GetAxis("Vertical"));
 
-
-
-
 		//キャラの移動
 		if (input_value.x != 0 || input_value.y != 0) {
 			direction = transform.position - center_point;
@@ -156,6 +153,7 @@ public class test_walk : MonoBehaviour {
 		if (Input.GetButtonDown ("Jump") && !s.stumped && jump_flg) {
 			rb.AddForce (new Vector3 (0, 5 * jump, 0), ForceMode.Impulse);
 			jump_flg = false;
+			Debug.Log ("JUMP " + this.transform.name);
 		}
 	}
 
