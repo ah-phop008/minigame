@@ -6,7 +6,7 @@ using System;
 public class GameManager : MonoBehaviour {
 
 	//Timerの変数
-	int min = 1;
+	int min = 3;
 	float sec = 0;
 	int oldSec = 0;
 	bool timerFlag = true;

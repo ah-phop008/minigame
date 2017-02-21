@@ -22,6 +22,7 @@ public class test_walk : MonoBehaviour {
 	Vector3 decision_speed = new Vector3(0, 0, 0);
 	Vector3 horizontal_move;//キーボードの変数
 	public Vector3 center_point;
+	Vector3 tmp;
 
 	//その他
 	public GameObject Ammo;
@@ -141,6 +142,7 @@ public class test_walk : MonoBehaviour {
 			decision_speed.z = input_value.y;
 
 			rb.MovePosition (transform.position + speed2 * decision_speed);
+
 			//キャラの向き
 			transform.forward = decision_speed;
 
@@ -149,6 +151,14 @@ public class test_walk : MonoBehaviour {
 		} else {
 			anim.SetBool ("isRunning", false);
 		}
+
+		//移動の制限
+		tmp = transform.position;
+		tmp.x = (transform.position.z - center_point.z) / Mathf.Tan(26.2f) - 1;
+		tmp.x = Mathf.Clamp (transform.position.x, -tmp.x, tmp.x);
+		transform.position = tmp;
+
+
 
 		if (Input.GetButtonDown ("Jump") && !s.stumped && jump_flg) {
 			rb.AddForce (new Vector3 (0, 5 * jump, 0), ForceMode.Impulse);
